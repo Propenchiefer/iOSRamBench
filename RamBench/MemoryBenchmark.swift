@@ -1,6 +1,7 @@
 import Foundation
 import UIKit
 import Darwin.Mach
+import Metal
 
 class MemoryBenchmark: ObservableObject {
     @Published var totalAllocated: Int = 0
@@ -8,17 +9,21 @@ class MemoryBenchmark: ObservableObject {
     @Published var currentMemoryInfo: MemoryInfo?
     
     private var allocatedPointers: [(pointer: UnsafeMutableRawPointer?, size: Int)] = []
+    private var mallocPointers: [UnsafeMutableRawPointer?] = []
+    private var metalBuffers: [MTLBuffer] = []
+    private var metalTextures: [MTLTexture] = []
     private let storageKey = "benchmarks_data"
     private var isRunning = false
     private let GB = 1024 * 1024 * 1024
     private let MB = 1024 * 1024
     private let KB = 1024
+    private var metalDevice: MTLDevice?
     
-    private var isIPad: Bool {
-        return UIDevice.current.userInterfaceIdiom == .pad
-    }
+    private var deviceProfile: (ramGB: Double, isM1OrLater: Bool, deviceFamily: String)
     
     init() {
+        deviceProfile = getDeviceMemoryProfile()
+        metalDevice = MTLCreateSystemDefaultDevice()
         loadPreviousResults()
         currentMemoryInfo = getMemoryInfo()
     }
@@ -32,11 +37,14 @@ class MemoryBenchmark: ObservableObject {
         isRunning = true
         totalAllocated = 0
         allocatedPointers.removeAll()
+        mallocPointers.removeAll()
+        metalBuffers.removeAll()
+        metalTextures.removeAll()
         
         updateMemoryInfo()
         let iosVersion = UIDevice.current.systemVersion
-        let deviceRAM = currentMemoryInfo?.ramSizeGB ?? 8.0
-        let deviceType = isIPad ? "iPad" : "iPhone"
+        let deviceRAM = deviceProfile.ramGB
+        let deviceType = deviceProfile.deviceFamily
         
         var saved = UserDefaults.standard.array(forKey: storageKey) as? [[String: Any]] ?? []
         saved.append([
@@ -52,112 +60,51 @@ class MemoryBenchmark: ObservableObject {
     }
     
     private func calculateChunkSize(totalAllocatedSoFar: Int, ramGB: Double) -> Int {
-        if isIPad {
-            return calculateIPadChunkSize(totalAllocatedSoFar: totalAllocatedSoFar, ramGB: ramGB)
-        } else {
-            return calculateIPhoneChunkSize(totalAllocatedSoFar: totalAllocatedSoFar, ramGB: ramGB)
-        }
-    }
-    
-
-    private func calculateIPadChunkSize(totalAllocatedSoFar: Int, ramGB: Double) -> Int {
         let allocatedGB = Double(totalAllocatedSoFar) / Double(GB)
+        let allocatedPercentage = allocatedGB / ramGB
+        let isIPad = deviceProfile.deviceFamily == "iPad"
+        let isM1OrLater = deviceProfile.isM1OrLater
         
-        let baseSize: Int
-        switch ramGB {
-        case let x where x <= 3.5:  // iPads
-            baseSize = 128 * MB
-        case let x where x <= 4.5:
-            baseSize = 192 * MB
-        case let x where x <= 6.5:
-            baseSize = 256 * MB
-        case let x where x <= 8.5:
-            baseSize = 384 * MB
-        case let x where x <= 12.5:
-            baseSize = 512 * MB
-        default:
-            baseSize = 768 * MB
-        }
+        let baseMultiplier = isM1OrLater ? 1.5 : 1.0
+        let deviceMultiplier = isIPad ? 2.0 : 1.0
         
-        if allocatedGB >= ramGB * 0.85 {
-            return 4 * MB
-        } else if allocatedGB >= ramGB * 0.75 {
-            return 8 * MB
-        } else if allocatedGB >= ramGB * 0.65 {
-            return 16 * MB
-        } else if allocatedGB >= ramGB * 0.55 {
-            return 32 * MB
-        } else if allocatedGB >= ramGB * 0.45 {
-            return 64 * MB
-        } else if allocatedGB >= ramGB * 0.35 {
-            return baseSize / 2
+        if allocatedPercentage >= 0.98 {
+            return max(64 * KB, Int(Double(64 * KB) * baseMultiplier))
+        } else if allocatedPercentage >= 0.96 {
+            return max(128 * KB, Int(Double(128 * KB) * baseMultiplier))
+        } else if allocatedPercentage >= 0.94 {
+            return max(256 * KB, Int(Double(256 * KB) * baseMultiplier))
+        } else if allocatedPercentage >= 0.92 {
+            return max(512 * KB, Int(Double(512 * KB) * baseMultiplier))
+        } else if allocatedPercentage >= 0.90 {
+            return max(1 * MB, Int(Double(1 * MB) * baseMultiplier))
+        } else if allocatedPercentage >= 0.85 {
+            return max(2 * MB, Int(Double(2 * MB) * baseMultiplier))
+        } else if allocatedPercentage >= 0.80 {
+            return max(4 * MB, Int(Double(4 * MB) * baseMultiplier))
+        } else if allocatedPercentage >= 0.75 {
+            return max(8 * MB, Int(Double(8 * MB) * baseMultiplier))
+        } else if allocatedPercentage >= 0.70 {
+            return max(12 * MB, Int(Double(12 * MB) * baseMultiplier * deviceMultiplier))
+        } else if allocatedPercentage >= 0.60 {
+            return max(16 * MB, Int(Double(16 * MB) * baseMultiplier * deviceMultiplier))
+        } else if allocatedPercentage >= 0.50 {
+            return max(24 * MB, Int(Double(24 * MB) * baseMultiplier * deviceMultiplier))
+        } else if allocatedPercentage >= 0.40 {
+            return max(32 * MB, Int(Double(32 * MB) * baseMultiplier * deviceMultiplier))
+        } else if allocatedPercentage >= 0.30 {
+            return max(48 * MB, Int(Double(48 * MB) * baseMultiplier * deviceMultiplier))
+        } else if allocatedPercentage >= 0.20 {
+            return max(64 * MB, Int(Double(64 * MB) * baseMultiplier * deviceMultiplier))
         } else {
-            return baseSize
-        }
-    }
-    
-    private func calculateIPhoneChunkSize(totalAllocatedSoFar: Int, ramGB: Double) -> Int {
-        let allocatedGB = Double(totalAllocatedSoFar) / Double(GB)
-        
-        let baseSize: Int
-        switch ramGB {
-        case let x where x <= 3.5:
-            baseSize = 32 * MB
-        case let x where x <= 4.5:
-            baseSize = 48 * MB
-        case let x where x <= 6.5:
-            baseSize = 64 * MB
-        case let x where x <= 8.5:
-            baseSize = 96 * MB
-        default:
-            baseSize = 128 * MB
-        }
-        if allocatedGB >= ramGB * 0.95 {
-            return 256 * KB
-        } else if allocatedGB >= ramGB * 0.93 {
-            return 512 * KB
-        } else if allocatedGB >= ramGB * 0.91 {
-            return 768 * KB
-        } else if allocatedGB >= ramGB * 0.89 {
-            return 1 * MB
-        } else if allocatedGB >= ramGB * 0.87 {
-            return Int(1.5) * MB
-        } else if allocatedGB >= ramGB * 0.85 {
-            return 2 * MB
-        }
-        else if allocatedGB >= ramGB * 0.83 {
-            return 3 * MB
-        } else if allocatedGB >= ramGB * 0.81 {
-            return 4 * MB
-        } else if allocatedGB >= ramGB * 0.79 {
-            return 5 * MB
-        } else if allocatedGB >= ramGB * 0.77 {
-            return 6 * MB
-        } else if allocatedGB >= ramGB * 0.75 {
-            return 8 * MB
-        }
-        else if allocatedGB >= ramGB * 0.7 {
-            return 10 * MB
-        } else if allocatedGB >= ramGB * 0.65 {
-            return 12 * MB
-        } else if allocatedGB >= ramGB * 0.6 {
-            return 16 * MB
-        } else if allocatedGB >= ramGB * 0.55 {
-            return 20 * MB
-        } else if allocatedGB >= ramGB * 0.5 {
-            return 24 * MB
-        }
-        else if allocatedGB >= ramGB * 0.4 {
-            return baseSize / 2
-        } else if allocatedGB >= ramGB * 0.2 {
-            return baseSize * 3 / 4
-        } else {
-            return baseSize
+            let baseSize = isIPad ? (128 * MB) : (64 * MB)
+            return max(baseSize, Int(Double(baseSize) * baseMultiplier * deviceMultiplier))
         }
     }
     
     private func allocateNext(completion: @escaping (Double) -> Void) {
-        let delay = 0.05
+        let delayMultiplier = deviceProfile.ramGB > 8.0 ? 0.02 : 0.05
+        let delay = max(0.01, delayMultiplier)
         
         DispatchQueue.global(qos: .userInitiated).asyncAfter(deadline: .now() + delay) {
             let memInfo = self.currentMemoryInfo ?? getMemoryInfo()
@@ -168,27 +115,19 @@ class MemoryBenchmark: ObservableObject {
                 ramGB: ramSizeGB
             )
             
-            var address: vm_address_t = 0
-            let kr = vm_allocate(mach_task_self_, &address, vm_size_t(chunk), VM_FLAGS_ANYWHERE)
-            if kr == KERN_SUCCESS {
-                let ptr = UnsafeMutableRawPointer(bitPattern: address)
-                
-                if let ptr = ptr {
-                    memset(ptr, 1, chunk)
-                    self.allocatedPointers.append((ptr, chunk))
+            let allocationType = self.chooseAllocationType(allocatedPercentage: Double(self.totalAllocated) / Double(self.GB) / ramSizeGB)
+            let success = self.allocateMemory(size: chunk, type: allocationType)
+            
+            if success {
+                DispatchQueue.main.async {
+                    self.totalAllocated += chunk
+                    let totalGB = max(
+                        Double(self.totalAllocated) / Double(self.GB),
+                        Double(self.getPhysicalMemoryFootprint()) / Double(self.GB)
+                    )
+                    self.saveIntermediate(totalGB)
                     
-                    DispatchQueue.main.async {
-                        self.totalAllocated += chunk
-                        let gb = Double(self.totalAllocated) / Double(self.GB)
-                        self.saveIntermediate(gb)
-                        
-                        self.allocateNext(completion: completion)
-                    }
-                } else {
-                    self.isRunning = false
-                    let gb = Double(self.totalAllocated) / Double(self.GB)
-                    self.saveIntermediate(gb)
-                    completion(gb)
+                    self.allocateNext(completion: completion)
                 }
             } else {
                 self.tryWithSmallerChunk(currentChunk: chunk, completion: completion)
@@ -196,44 +135,141 @@ class MemoryBenchmark: ObservableObject {
         }
     }
     
+    private func chooseAllocationType(allocatedPercentage: Double) -> AllocationType {
+        if allocatedPercentage < 0.3 {
+            return .vmAllocate
+        } else if allocatedPercentage < 0.6 {
+            return [.vmAllocate, .malloc, .metalBuffer].randomElement() ?? .vmAllocate
+        } else if allocatedPercentage < 0.8 {
+            return [.malloc, .metalBuffer, .metalTexture].randomElement() ?? .malloc
+        } else {
+            return [.metalBuffer, .metalTexture].randomElement() ?? .metalBuffer
+        }
+    }
+    
+    private enum AllocationType {
+        case vmAllocate, malloc, metalBuffer, metalTexture
+    }
+    
+    private func allocateMemory(size: Int, type: AllocationType) -> Bool {
+        switch type {
+        case .vmAllocate:
+            return allocateVM(size: size)
+        case .malloc:
+            return allocateMalloc(size: size)
+        case .metalBuffer:
+            return allocateMetalBuffer(size: size)
+        case .metalTexture:
+            return allocateMetalTexture(size: size)
+        }
+    }
+    
+    private func allocateVM(size: Int) -> Bool {
+        var address: vm_address_t = 0
+        let kr = vm_allocate(mach_task_self_, &address, vm_size_t(size), VM_FLAGS_ANYWHERE)
+        if kr == KERN_SUCCESS {
+            let ptr = UnsafeMutableRawPointer(bitPattern: address)
+            if let ptr = ptr {
+                memset(ptr, 1, size)
+                allocatedPointers.append((ptr, size))
+                return true
+            }
+        }
+        return false
+    }
+    
+    private func allocateMalloc(size: Int) -> Bool {
+        let ptr = malloc(size)
+        if let ptr = ptr {
+            memset(ptr, 1, size)
+            mallocPointers.append(ptr)
+            return true
+        }
+        return false
+    }
+    
+    private func allocateMetalBuffer(size: Int) -> Bool {
+        guard let device = metalDevice else { return false }
+        guard let buffer = device.makeBuffer(length: size, options: [.storageModeShared]) else { return false }
+        
+        let contents = buffer.contents()
+        memset(contents, 1, size)
+        metalBuffers.append(buffer)
+        return true
+    }
+    
+    private func allocateMetalTexture(size: Int) -> Bool {
+        guard let device = metalDevice else { return false }
+        
+        let dimension = Int(sqrt(Double(size / 4)))
+        guard dimension > 0 else { return false }
+        
+        let descriptor = MTLTextureDescriptor.texture2DDescriptor(
+            pixelFormat: .rgba8Unorm,
+            width: dimension,
+            height: dimension,
+            mipmapped: false
+        )
+        descriptor.usage = [.shaderRead, .shaderWrite]
+        descriptor.storageMode = .shared
+        
+        guard let texture = device.makeTexture(descriptor: descriptor) else { return false }
+        
+        let region = MTLRegionMake2D(0, 0, dimension, dimension)
+        let data = UnsafeMutableRawPointer.allocate(byteCount: size, alignment: 1)
+        memset(data, 1, size)
+        texture.replace(region: region, mipmapLevel: 0, withBytes: data, bytesPerRow: dimension * 4)
+        data.deallocate()
+        
+        metalTextures.append(texture)
+        return true
+    }
+    
     private func tryWithSmallerChunk(currentChunk: Int, completion: @escaping (Double) -> Void) {
-        let minimumChunkSize = isIPad ? (1 * MB) : (64 * KB)
+        let isIPad = deviceProfile.deviceFamily == "iPad"
+        let minimumChunkSize = isIPad ? (512 * KB) : (64 * KB)
         
         if currentChunk <= minimumChunkSize {
             self.isRunning = false
-            let gb = Double(self.totalAllocated) / Double(self.GB)
-            self.saveIntermediate(gb)
-            completion(gb)
+            let totalGB = max(
+                Double(self.totalAllocated) / Double(self.GB),
+                Double(self.getPhysicalMemoryFootprint()) / Double(self.GB)
+            )
+            self.saveIntermediate(totalGB)
+            completion(totalGB)
             return
         }
         
-        let reductionFactor = isIPad ? 2.0 : 1.2
+        let reductionFactor = isIPad ? 2.0 : 1.5
         let smallerChunk = max(minimumChunkSize, Int(Double(currentChunk) / reductionFactor))
         
-        var address: vm_address_t = 0
-        let kr = vm_allocate(mach_task_self_, &address, vm_size_t(smallerChunk), VM_FLAGS_ANYWHERE)
-        if kr == KERN_SUCCESS {
-            let ptr = UnsafeMutableRawPointer(bitPattern: address)
-            
-            if let ptr = ptr {
-                memset(ptr, 1, smallerChunk)
-                self.allocatedPointers.append((ptr, smallerChunk))
-                
-                DispatchQueue.main.async {
-                    self.totalAllocated += smallerChunk
-                    let gb = Double(self.totalAllocated) / Double(self.GB)
-                    self.saveIntermediate(gb)
-                    self.allocateNext(completion: completion)
-                }
-            } else {
-                self.isRunning = false
-                let gb = Double(self.totalAllocated) / Double(self.GB)
-                self.saveIntermediate(gb)
-                completion(gb)
+        let allocationType = self.chooseAllocationType(allocatedPercentage: Double(self.totalAllocated) / Double(self.GB) / self.deviceProfile.ramGB)
+        let success = self.allocateMemory(size: smallerChunk, type: allocationType)
+        
+        if success {
+            DispatchQueue.main.async {
+                self.totalAllocated += smallerChunk
+                let totalGB = max(
+                    Double(self.totalAllocated) / Double(self.GB),
+                    Double(self.getPhysicalMemoryFootprint()) / Double(self.GB)
+                )
+                self.saveIntermediate(totalGB)
+                self.allocateNext(completion: completion)
             }
         } else {
             self.tryWithSmallerChunk(currentChunk: smallerChunk, completion: completion)
         }
+    }
+    
+    private func getPhysicalMemoryFootprint() -> UInt64 {
+        var taskInfo = task_vm_info_data_t()
+        var count = mach_msg_type_number_t(MemoryLayout<task_vm_info_data_t>.size / MemoryLayout<Int32>.size)
+        let result = withUnsafeMutablePointer(to: &taskInfo) {
+            $0.withMemoryRebound(to: integer_t.self, capacity: Int(count)) {
+                task_info(mach_task_self_, UInt32(TASK_VM_INFO), $0, &count)
+            }
+        }
+        return result == KERN_SUCCESS ? UInt64(taskInfo.phys_footprint) : UInt64(getAppMemoryUsage())
     }
     
     func clearMemory() {
@@ -244,6 +280,17 @@ class MemoryBenchmark: ObservableObject {
             }
         }
         allocatedPointers.removeAll()
+        
+        for ptr in mallocPointers {
+            if let validPtr = ptr {
+                free(validPtr)
+            }
+        }
+        mallocPointers.removeAll()
+        
+        metalBuffers.removeAll()
+        metalTextures.removeAll()
+        
         totalAllocated = 0
         isRunning = false
         updateMemoryInfo()
@@ -254,18 +301,18 @@ class MemoryBenchmark: ObservableObject {
         previousResults = []
     }
     
-    private func saveIntermediate(_ gb: Double) {
+    private func saveIntermediate(_ totalGB: Double) {
         var all = previousResults
         if all.isEmpty {
             let memInfo = currentMemoryInfo ?? getMemoryInfo()
             all.append([
-                "gb": gb,
+                "gb": totalGB,
                 "iosVersion": UIDevice.current.systemVersion,
                 "deviceRAM": memInfo.ramSizeGB,
-                "deviceType": isIPad ? "iPad" : "iPhone"
+                "deviceType": deviceProfile.deviceFamily
             ])
         } else {
-            all[all.count - 1]["gb"] = gb
+            all[all.count - 1]["gb"] = totalGB
         }
         UserDefaults.standard.set(all, forKey: storageKey)
         DispatchQueue.main.async { self.previousResults = all }

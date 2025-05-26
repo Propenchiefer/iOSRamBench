@@ -7,7 +7,6 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		5D3781BE2DD853BF0052D19A /* RamBenchTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5D3781BC2DD853BF0052D19A /* RamBenchTests.swift */; };
 		5DA863CA2DCABCA300B8CC2E /* .gitignore in Resources */ = {isa = PBXBuildFile; fileRef = 5DA863C92DCABC9F00B8CC2E /* .gitignore */; };
 		5DA864622DCB198D00B8CC2E /* README.md in Resources */ = {isa = PBXBuildFile; fileRef = 5DA864602DCB197000B8CC2E /* README.md */; };
 		5DA864872DCB1BD800B8CC2E /* License.txt in Resources */ = {isa = PBXBuildFile; fileRef = 5DA864862DCB1BD800B8CC2E /* License.txt */; };
@@ -31,24 +30,18 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
-		5D3781B92DD853850052D19A /* RamBench.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; name = RamBench.app; path = "/Users/seth/Desktop/RamBench/build/Debug-iphoneos/RamBench.app"; sourceTree = "<absolute>"; };
-		5D3781BA2DD853850052D19A /* RamBenchTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; name = RamBenchTests.xctest; path = "/Users/seth/Desktop/RamBench/build/Debug-iphoneos/RamBench.app/PlugIns/RamBenchTests.xctest"; sourceTree = "<absolute>"; };
-		5D3781BB2DD853850052D19A /* RamBenchUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; name = RamBenchUITests.xctest; path = "/Users/seth/Desktop/RamBench/build/Debug-iphoneos/RamBenchUITests-Runner.app/PlugIns/RamBenchUITests.xctest"; sourceTree = "<absolute>"; };
-		5D3781BC2DD853BF0052D19A /* RamBenchTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RamBenchTests.swift; sourceTree = "<group>"; };
 		5DA863C92DCABC9F00B8CC2E /* .gitignore */ = {isa = PBXFileReference; lastKnownFileType = text; path = .gitignore; sourceTree = "<group>"; };
 		5DA864602DCB197000B8CC2E /* README.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = "<group>"; };
 		5DA864862DCB1BD800B8CC2E /* License.txt */ = {isa = PBXFileReference; lastKnownFileType = text; path = License.txt; sourceTree = "<group>"; };
+		5DF4EEEC2DE41C9E0008C763 /* RamBench.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = RamBench.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		5DF4EEED2DE41C9E0008C763 /* RamBenchTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; name = RamBenchTests.xctest; path = "/Users/seth/Desktop/RamBench/build/Debug-iphoneos/RamBench.app/PlugIns/RamBenchTests.xctest"; sourceTree = "<absolute>"; };
+		5DF4EEEE2DE41C9E0008C763 /* RamBenchUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; name = RamBenchUITests.xctest; path = "/Users/seth/Desktop/RamBench/build/Debug-iphoneos/RamBenchUITests-Runner.app/PlugIns/RamBenchUITests.xctest"; sourceTree = "<absolute>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
 		5DA8639E2DCAB71C00B8CC2E /* RamBench */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
 			path = RamBench;
-			sourceTree = "<group>";
-		};
-		5DA863B62DCAB71D00B8CC2E /* RamBenchUITests */ = {
-			isa = PBXFileSystemSynchronizedRootGroup;
-			path = RamBenchUITests;
 			sourceTree = "<group>";
 		};
 /* End PBXFileSystemSynchronizedRootGroup section */
@@ -78,23 +71,14 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
-		5D3781BD2DD853BF0052D19A /* RamBenchTests */ = {
-			isa = PBXGroup;
-			children = (
-				5D3781BC2DD853BF0052D19A /* RamBenchTests.swift */,
-			);
-			path = RamBenchTests;
-			sourceTree = "<group>";
-		};
 		5DA863932DCAB71C00B8CC2E = {
 			isa = PBXGroup;
 			children = (
 				5DA864602DCB197000B8CC2E /* README.md */,
 				5DA863C92DCABC9F00B8CC2E /* .gitignore */,
 				5DA8639E2DCAB71C00B8CC2E /* RamBench */,
-				5DA863B62DCAB71D00B8CC2E /* RamBenchUITests */,
 				5DA864862DCB1BD800B8CC2E /* License.txt */,
-				5D3781BD2DD853BF0052D19A /* RamBenchTests */,
+				5DF4EEEC2DE41C9E0008C763 /* RamBench.app */,
 			);
 			sourceTree = "<group>";
 		};
@@ -120,7 +104,7 @@
 			packageProductDependencies = (
 			);
 			productName = RamBench;
-			productReference = 5D3781B92DD853850052D19A /* RamBench.app */;
+			productReference = 5DF4EEEC2DE41C9E0008C763 /* RamBench.app */;
 			productType = "com.apple.product-type.application";
 		};
 		5DA863A82DCAB71D00B8CC2E /* RamBenchTests */ = {
@@ -140,7 +124,7 @@
 			packageProductDependencies = (
 			);
 			productName = RamBenchTests;
-			productReference = 5D3781BA2DD853850052D19A /* RamBenchTests.xctest */;
+			productReference = 5DF4EEED2DE41C9E0008C763 /* RamBenchTests.xctest */;
 			productType = "com.apple.product-type.bundle.unit-test";
 		};
 		5DA863B22DCAB71D00B8CC2E /* RamBenchUITests */ = {
@@ -156,14 +140,11 @@
 			dependencies = (
 				5DA863B52DCAB71D00B8CC2E /* PBXTargetDependency */,
 			);
-			fileSystemSynchronizedGroups = (
-				5DA863B62DCAB71D00B8CC2E /* RamBenchUITests */,
-			);
 			name = RamBenchUITests;
 			packageProductDependencies = (
 			);
 			productName = RamBenchUITests;
-			productReference = 5D3781BB2DD853850052D19A /* RamBenchUITests.xctest */;
+			productReference = 5DF4EEEE2DE41C9E0008C763 /* RamBenchUITests.xctest */;
 			productType = "com.apple.product-type.bundle.ui-testing";
 		};
 /* End PBXNativeTarget section */
@@ -249,7 +230,6 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				5D3781BE2DD853BF0052D19A /* RamBenchTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

@@ -92,8 +92,6 @@ struct ContentView: View {
         }
     }
     
-    // MARK: - View Components
-    
     private var headerView: some View {
         VStack(spacing: 6) {
             ZStack {
@@ -136,6 +134,19 @@ struct ContentView: View {
                 
                 Text("Memory Status")
                     .font(.system(size: 20, weight: .semibold))
+                
+                Spacer()
+                
+                if memoryInfo.memoryPressure > 0 {
+                    HStack(spacing: 4) {
+                        Circle()
+                            .fill(memoryInfo.memoryPressure >= 1.0 ? .red : .orange)
+                            .frame(width: 8, height: 8)
+                        Text(memoryInfo.memoryPressure >= 1.0 ? "Critical" : "Warning")
+                            .font(.caption)
+                            .foregroundColor(.secondary)
+                    }
+                }
             }
             
             VStack(alignment: .leading, spacing: 8) {
@@ -206,9 +217,12 @@ struct ContentView: View {
     private var memoryInfoRowsView: some View {
         VStack(alignment: .leading, spacing: 12) {
             memoryInfoRow(icon: "app.badge", title: "App Usage:", value: formatBytes(memoryInfo.appUsed))
-            memoryInfoRow(icon: "apps.iphone", title: "Active Apps:", value: formatBytes(memoryInfo.activeAndInactive))
-            memoryInfoRow(icon: "gear", title: "System Usage:", value: formatBytes(memoryInfo.systemUsed))
-            memoryInfoRow(icon: "plus.square.dashed", title: "Free Memory:", value: formatBytes(memoryInfo.free))
+            memoryInfoRow(icon: "apps.iphone", title: "Other Apps:", value: formatBytes(memoryInfo.activeAndInactive))
+            memoryInfoRow(icon: "gear", title: "System (Wired):", value: formatBytes(memoryInfo.systemUsed))
+            if memoryInfo.compressed > 0 {
+                memoryInfoRow(icon: "archivebox", title: "Compressed:", value: formatBytes(memoryInfo.compressed))
+            }
+            memoryInfoRow(icon: "plus.square.dashed", title: "Available:", value: formatBytes(memoryInfo.free))
         }
     }
     
@@ -237,9 +251,17 @@ struct ContentView: View {
                     ProgressView()
                         .scaleEffect(1.2)
                     
-                    Text("Benchmarking in progress...")
-                        .font(.system(size: 16, weight: .medium))
-                        .foregroundColor(.secondary)
+                    VStack(alignment: .leading, spacing: 4) {
+                        Text("Benchmarking in progress...")
+                            .font(.system(size: 16, weight: .medium))
+                            .foregroundColor(.secondary)
+                        
+                        if benchmark.totalAllocated > 0 {
+                            Text("Allocated: \(formatBytes(UInt64(benchmark.totalAllocated)))")
+                                .font(.system(size: 14, weight: .medium))
+                                .foregroundColor(.secondary)
+                        }
+                    }
                 }
                 .padding()
             } else {
@@ -356,7 +378,7 @@ struct ContentView: View {
                         Text("About RAMBench")
                             .font(.system(size: 22, weight: .bold))
                         
-                        Text("RAMBench is a memory performance analyzer that tests your device's RAM limits by incrementally allocating memory until the system threshold is reached.")
+                        Text("RAMBench is a memory performance analyzer that tests your device's RAM limits by incrementally allocating memory until the system threshold is reached using multiple allocation strategies including virtual memory, heap allocation, and Metal GPU resources.")
                             .font(.body)
                         
                         Text("Key Features")
@@ -366,6 +388,8 @@ struct ContentView: View {
                         featureItem(icon: "bell", text: "Detection of iOS memory management changes")
                         featureItem(icon: "device.phone", text: "Device-optimized allocation strategies")
                         featureItem(icon: "arrow.triangle.2.circlepath", text: "Benchmark history tracking")
+                        featureItem(icon: "speedometer", text: "Adaptive speed for different device types")
+                        featureItem(icon: "cpu", text: "Multiple memory allocation types including Metal GPU resources")
                     }
                     
                     Group {
@@ -374,9 +398,10 @@ struct ContentView: View {
                             .padding(.top, 8)
                         
                         warningItem(text: "Benchmarking will push your device to its memory limits and may cause temporary system unresponsiveness")
-                        warningItem(text: "Memory information displayed is an approximation based on available system metrics")
+                        warningItem(text: "Memory information displayed is based on system APIs and provides accurate real-time data")
                         warningItem(text: "Results may vary between runs due to system conditions and background processes")
                         warningItem(text: "For optimal results, close other apps before running a benchmark")
+                        warningItem(text: "The app uses multiple allocation strategies to simulate real-world memory usage patterns")
                     }
                 }
                 .padding()
@@ -396,26 +421,41 @@ struct ContentView: View {
     private var resultsSheetView: some View {
         NavigationStack {
             List {
-                ForEach(Array(benchmark.previousResults.enumerated().reversed()), id: \.offset) { _, result in
+                ForEach(Array(benchmark.previousResults.enumerated().reversed()), id: \.offset) { index, result in
                     if let gb = result["gb"] as? Double,
                        let iosVersion = result["iosVersion"] as? String,
-                       let deviceType = result["deviceType"] as? String {
+                       let deviceType = result["deviceType"] as? String,
+                       let deviceRAM = result["deviceRAM"] as? Double {
                         
-                        HStack {
-                            VStack(alignment: .leading, spacing: 4) {
-                                Text(String(format: "%.2f GB", gb))
-                                    .font(.system(size: 17, weight: .semibold))
+                        VStack(alignment: .leading, spacing: 8) {
+                            HStack {
+                                VStack(alignment: .leading, spacing: 4) {
+                                    Text(String(format: "%.2f GB", gb))
+                                        .font(.system(size: 17, weight: .semibold))
+                                    
+                                    Text("\(deviceType) • iOS \(iosVersion)")
+                                        .font(.system(size: 14))
+                                        .foregroundColor(.secondary)
+                                }
                                 
-                                Text("\(deviceType) • iOS \(iosVersion)")
-                                    .font(.system(size: 14))
-                                    .foregroundColor(.secondary)
+                                Spacer()
+                                
+                                VStack(alignment: .trailing, spacing: 2) {
+                                    Text(String(format: "%.1f%%", (gb / deviceRAM) * 100))
+                                        .font(.system(size: 15, weight: .medium))
+                                        .foregroundColor(accentColor)
+                                    
+                                    Text("of device RAM")
+                                        .font(.system(size: 11))
+                                        .foregroundColor(.secondary)
+                                }
                             }
                             
-                            Spacer()
-                            
-                            Text(String(format: "%.1f%%", Double(gb) / (Double(memoryInfo.total) / Double(gb)) * 100))
-                                .font(.system(size: 15, weight: .medium))
-                                .foregroundColor(accentColor)
+                            if deviceRAM > 0 {
+                                ProgressView(value: gb / deviceRAM)
+                                    .progressViewStyle(LinearProgressViewStyle(tint: accentColor))
+                                    .scaleEffect(x: 1, y: 0.7)
+                            }
                         }
                         .padding(.vertical, 4)
                     }
@@ -431,10 +471,12 @@ struct ContentView: View {
                 }
                 
                 ToolbarItem(placement: .topBarLeading) {
-                    Button(action: { benchmark.clearSavedResults() }) {
-                        Image(systemName: "trash")
+                    if !benchmark.previousResults.isEmpty {
+                        Button(action: { benchmark.clearSavedResults() }) {
+                            Image(systemName: "trash")
+                        }
+                        .foregroundColor(.red)
                     }
-                    .foregroundColor(.red)
                 }
             }
         }
@@ -464,8 +506,6 @@ struct ContentView: View {
         }
     }
     
-    // MARK: - Functionality
-    
     private func setupMemoryMonitoring() {
         Timer.scheduledTimer(withTimeInterval: 1.0, repeats: true) { _ in
             DispatchQueue.main.async {
@@ -480,6 +520,7 @@ struct ContentView: View {
         benchmark.startBenchmark { _ in
             DispatchQueue.main.async {
                 isRunning = false
+                memoryInfo = getMemoryInfo()
             }
         }
     }
@@ -505,4 +546,3 @@ struct ContentView_Previews: PreviewProvider {
         ContentView()
     }
 }
- 
