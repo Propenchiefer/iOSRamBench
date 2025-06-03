@@ -41,7 +41,10 @@ Rounding: Total RAM is rounded (e.g., 7.98 GB to 8 GB) for simplicity, which may
 
 ## Installation
 For best result's sideload or build with xcode with the increased memory entitlement (free), the extended virtual addressing entitlement, and the increased debugging memory limit entitlement (both paid). 
-IF you only have a free account, I suggest simply downloading it from the app store to save app id's https://apps.apple.com/us/app/rambench/id6745537329
+If you only have a free account, I suggest simply downloading it from the app store to save app id's https://apps.apple.com/us/app/rambench/id6745537329 
+
+### Why the two paid entitlements?
+Throughout my testing i've found both of them slightly increase your per app ram limit, using these along with RamBench (assuming you also use them on a memory heavy application) will yield more accurate result's to your personal limit.
 
 ## Contributing
 Contributions are welcome! Please submit issues or pull requests for bug fixes, or feature enhancements.
