@@ -34,8 +34,8 @@
 		5DA864602DCB197000B8CC2E /* README.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = "<group>"; };
 		5DA864862DCB1BD800B8CC2E /* License.txt */ = {isa = PBXFileReference; lastKnownFileType = text; path = License.txt; sourceTree = "<group>"; };
 		5DF4EEEC2DE41C9E0008C763 /* RamBench.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = RamBench.app; sourceTree = BUILT_PRODUCTS_DIR; };
-		5DF4EEED2DE41C9E0008C763 /* RamBenchTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; name = RamBenchTests.xctest; path = "/Users/seth/Desktop/RamBench/build/Debug-iphoneos/RamBench.app/PlugIns/RamBenchTests.xctest"; sourceTree = "<absolute>"; };
-		5DF4EEEE2DE41C9E0008C763 /* RamBenchUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; name = RamBenchUITests.xctest; path = "/Users/seth/Desktop/RamBench/build/Debug-iphoneos/RamBenchUITests-Runner.app/PlugIns/RamBenchUITests.xctest"; sourceTree = "<absolute>"; };
+		5DF4EEFE2DE430940008C763 /* RamBenchTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = RamBenchTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		5DF4EEFF2DE430940008C763 /* RamBenchUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = RamBenchUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
@@ -79,6 +79,8 @@
 				5DA8639E2DCAB71C00B8CC2E /* RamBench */,
 				5DA864862DCB1BD800B8CC2E /* License.txt */,
 				5DF4EEEC2DE41C9E0008C763 /* RamBench.app */,
+				5DF4EEFE2DE430940008C763 /* RamBenchTests.xctest */,
+				5DF4EEFF2DE430940008C763 /* RamBenchUITests.xctest */,
 			);
 			sourceTree = "<group>";
 		};
@@ -124,7 +126,7 @@
 			packageProductDependencies = (
 			);
 			productName = RamBenchTests;
-			productReference = 5DF4EEED2DE41C9E0008C763 /* RamBenchTests.xctest */;
+			productReference = 5DF4EEFE2DE430940008C763 /* RamBenchTests.xctest */;
 			productType = "com.apple.product-type.bundle.unit-test";
 		};
 		5DA863B22DCAB71D00B8CC2E /* RamBenchUITests */ = {
@@ -144,7 +146,7 @@
 			packageProductDependencies = (
 			);
 			productName = RamBenchUITests;
-			productReference = 5DF4EEEE2DE41C9E0008C763 /* RamBenchUITests.xctest */;
+			productReference = 5DF4EEFF2DE430940008C763 /* RamBenchUITests.xctest */;
 			productType = "com.apple.product-type.bundle.ui-testing";
 		};
 /* End PBXNativeTarget section */
@@ -384,7 +386,7 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_ENTITLEMENTS = RamBench/RamBench.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 3;
+				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = VH57B8CAM8;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
@@ -393,12 +395,12 @@
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
-				IPHONEOS_DEPLOYMENT_TARGET = 18.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 1.1;
+				MARKETING_VERSION = 1.2;
 				PRODUCT_BUNDLE_IDENTIFIER = com.Autumn.RamBench;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = YES;
@@ -414,7 +416,7 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_ENTITLEMENTS = RamBench/RamBench.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 3;
+				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = VH57B8CAM8;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
@@ -423,12 +425,12 @@
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
-				IPHONEOS_DEPLOYMENT_TARGET = 18.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 1.1;
+				MARKETING_VERSION = 1.2;
 				PRODUCT_BUNDLE_IDENTIFIER = com.Autumn.RamBench;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = YES;
@@ -445,7 +447,7 @@
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = VH57B8CAM8;
 				GENERATE_INFOPLIST_FILE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 18.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
 				MARKETING_VERSION = 1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.Autumn.RamBenchTests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -464,7 +466,7 @@
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = VH57B8CAM8;
 				GENERATE_INFOPLIST_FILE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 18.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
 				MARKETING_VERSION = 1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.Autumn.RamBenchTests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -482,7 +484,7 @@
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = VH57B8CAM8;
 				GENERATE_INFOPLIST_FILE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 18.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
 				MARKETING_VERSION = 1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.Autumn.RamBenchUITests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -500,7 +502,7 @@
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = VH57B8CAM8;
 				GENERATE_INFOPLIST_FILE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 18.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
 				MARKETING_VERSION = 1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.Autumn.RamBenchUITests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
