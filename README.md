@@ -1,7 +1,7 @@
 # RAMBench: iOS RAM Benchmarking Tool
 
 ## Overview
-RAMBench is a iOS app designed to benchmark the RAM limits of your iOS device. With recent iOS updates (18.2–18.5) introducing changes to memory management that have caused confusion (specifically for emulation and power-users of the platform), RAMBench provides a clear way to test memory allocation limits specific to your device and iOS version.
+RAMBench is a iOS app designed to benchmark the RAM limits of your iOS device. With recent iOS updates (18.2–26) introducing changes to memory management that have caused confusion (specifically for emulation and power-users of the platform), RAMBench provides a clear way to test memory allocation limits specific to your device and iOS version.
 
 The app allocates memory incrementally until it reaches the system’s limit, records the maximum allocated amount alongside the iOS version.
 
