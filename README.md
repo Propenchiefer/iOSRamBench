@@ -7,32 +7,14 @@ The app allocates memory incrementally until it reaches the system’s limit, re
 
 ## Features
 ### These are not 100% accurate, definitely take with a grain of salt
-Memory Benchmarking: Allocates memory in chunks until the process is killed.
-iOS Version Tracking: Saves benchmark results with the iOS version (e.g., 18.5), allowing comparison across updates.
-Real-Time Memory Stats: Updates every second to show:
-Total Device RAM
-Total Used RAM
-This App’s RAM
-Free RAM
-
-
-## How It Works (for nerds)
-Benchmarking:
-
-The MemoryBenchmark class allocates memory using malloc in chunks, starting higher and reducing each chunk to up to 16 KB as it nears the system limit.
-It tracks the total allocated memory (totalAllocated) and stops when malloc or vm_allocate fails, indicating the RAM limit.
-Results are saved in UserDefaults with the model and iOS version and displayed in a list.
-
-
-Memory Monitoring (WHICH IS NOT ACCURATE):
-
-The MemoryInfo struct retrieves:
-Total RAM: From sysctlbyname("hw.memsize"), rounded to standard sizes.
-Free RAM: From host_statistics (free page count × page size).
-Used RAM: Calculated as total - free, including all non-free memory.
-App’s RAM: From task_info(mach_task_self_(), TASK_BASIC_INFO), reporting RAMBench’s own memory.
-
-
+- Memory Benchmarking: Allocates memory in chunks until the process is killed.
+- iOS Version Tracking: Saves benchmark results with the iOS version (e.g., 18.5), allowing comparison across updates.
+- Detailed Benchmark results
+### - Memory Stats, Updates every second to show:
+- Total Device RAM
+- Total Used RAM
+- This App’s RAM
+- Free RAM
 
 ## Limitations
 iOS Restrictions: Mach APIs provide limited per-process memory details due to sandboxing, so metrics are system-wide or app-specific.
