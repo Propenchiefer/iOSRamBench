@@ -1,7 +1,7 @@
 # RAMBench: iOS RAM Benchmarking Tool
 
 ## Overview
-RAMBench is a iOS app designed to benchmark the RAM limits of your iOS device. With recent iOS updates (18.2–18.5) introducing changes to memory management that have caused confusion (specifically for emulation and power-users of the platform), RAMBench provides a clear way to test memory allocation limits specific to your device and iOS version.
+RAMBench is a iOS app designed to benchmark the RAM limits of your iOS device. With recent iOS updates (18.2–26) introducing changes to memory management that have caused confusion (specifically for emulation and power-users of the platform), RAMBench provides a clear way to test memory allocation limits specific to your device and iOS version.
 
 The app allocates memory incrementally until it reaches the system’s limit, records the maximum allocated amount alongside the iOS version.
 
@@ -19,18 +19,18 @@ Free RAM
 ## How It Works (for nerds)
 Benchmarking:
 
-The MemoryBenchmark class allocates memory using malloc in chunks, starting at 100 MB and reducing up to 16 KB as it nears the system limit.
-It tracks the total allocated memory (totalAllocated) and stops when malloc fails, indicating the RAM limit.
-Results are saved in UserDefaults with the iOS version (UIDevice.current.systemVersion) and displayed in a list.
+The MemoryBenchmark class allocates memory using malloc in chunks, starting higher and reducing each chunk to up to 16 KB as it nears the system limit.
+It tracks the total allocated memory (totalAllocated) and stops when malloc or vm_allocate fails, indicating the RAM limit.
+Results are saved in UserDefaults with the model and iOS version and displayed in a list.
 
 
-Memory Monitoring:
+Memory Monitoring (WHICH IS NOT ACCURATE):
 
 The MemoryInfo struct retrieves:
 Total RAM: From sysctlbyname("hw.memsize"), rounded to standard sizes.
 Free RAM: From host_statistics (free page count × page size).
 Used RAM: Calculated as total - free, including all non-free memory.
-App’s RAM: From task_info(mach_task_self_(), TASK_BASIC_INFO), reporting RAMBench’s resident memory.
+App’s RAM: From task_info(mach_task_self_(), TASK_BASIC_INFO), reporting RAMBench’s own memory.
 
 
 
@@ -40,8 +40,11 @@ Memory Compression: iOS compresses memory, so the app’s reported RAM (e.g., 6 
 Rounding: Total RAM is rounded (e.g., 7.98 GB to 8 GB) for simplicity, which may slightly skew calculations.
 
 ## Installation
-Sideload or build the project in Xcode with the increased memory entitlement. 
-(it seem's the increased debugging memory limit / the extended virtual addressing entitlement's also play a role. For best result's with testing and your applications, enable those too if accessible.)
+For best result's sideload or build with xcode with the increased memory entitlement (free), the extended virtual addressing entitlement, and the increased debugging memory limit entitlement (both paid). 
+If you only have a free account, I suggest simply downloading it from the app store to save app id's https://apps.apple.com/us/app/rambench/id6745537329 
+
+### Why the two paid entitlements?
+Throughout my testing i've found both of them slightly increase your per app ram limit, using these along with RamBench (assuming you also use them on a memory heavy application) will yield more accurate result's to your personal limit.
 
 ## Contributing
 Contributions are welcome! Please submit issues or pull requests for bug fixes, or feature enhancements.
